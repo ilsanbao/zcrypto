@@ -8,10 +8,12 @@ import "time"
 
 // Validation stores different validation levels for a given certificate
 type Validation struct {
-	BrowserTrusted bool   `json:"browser_trusted"`
-	BrowserError   string `json:"browser_error,omitempty"`
-	MatchesDomain  bool   `json:"matches_domain,omitempty"`
-	Domain         string `json:"-"`
+	BrowserTrusted  bool   `json:"browser_trusted"`
+	BrowserError    string `json:"browser_error,omitempty"`
+	MatchesDomain   bool   `json:"matches_domain,omitempty"`
+	Domain          string `json:"-"`
+	NameError       error  `json:"-"`
+	ValidationError error  `json:"-"`
 }
 
 // ValidateWithStupidDetail fills out a Validation struct given a leaf
@@ -34,9 +36,11 @@ func (c *Certificate) ValidateWithStupidDetail(opts VerifyOptions) (chains [][]*
 		case HostnameError:
 			out.BrowserTrusted = true
 			out.MatchesDomain = false
+			out.NameError = err
 		default:
 			out.BrowserTrusted = false
 			out.BrowserError = err.Error()
+			out.ValidationError = err
 		}
 	} else {
 		out.BrowserTrusted = true
